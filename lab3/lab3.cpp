@@ -2,6 +2,6 @@
 #include "GameOfLife.h"
 using namespace std;
 int main() {
-	Life a;
-	a.Run();
+	//Life a;
+	Play();
 }

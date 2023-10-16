@@ -1,12 +1,73 @@
 #include "GameOfLife.h"
+#include <fstream>
 #include <iostream>
 #include "windows.h"
+#include <iostream>
 #include <thread>
 
+struct ComandParametrs {
+	std::string dump;
+	bool isDump = false;
+	bool isTick = true;
+	bool exit = false;
+	int tick = 30;
+}ComandParametrs;
+
 void Play() {
+	//Life life;
+	std::thread thr1(LifeOrganization);
+	std::thread thr2(Comand);
+	thr1.join();
+	thr2.join();
+}
+
+void LifeOrganization() {
 	Life life;
-	std::thread thr1(Life::Run, life);
-	std::thread thr2();
+	while (true)
+	{
+		if (ComandParametrs.isTick) {
+			for (size_t i = 0; i < ComandParametrs.tick; i++)
+			{
+				Sleep(200);
+				life.OneStep();
+			}
+			ComandParametrs.isTick = false;
+			ComandParametrs.tick = 1;
+		}
+		if (ComandParametrs.isDump) {
+			std::ofstream out;
+			out.open(ComandParametrs.dump);
+			if (out.is_open())
+			{
+				out << "#N " << ComandParametrs.dump << std::endl;
+				out << "#R B" <<life. <<std::endl;
+			}
+			out.close();
+			ComandParametrs.isDump = false;
+		}
+	}
+}
+
+void Comand() {
+	while (true)
+	{
+		std::string comand;
+		std::string obj;
+		std::cin >> comand >> obj;
+		if (comand == "exit") {
+			ComandParametrs.exit = true;
+		}
+		if (comand == "tick") {
+			ComandParametrs.isTick = true;
+			ComandParametrs.tick = stoi(obj);
+		}
+		if (comand == "dump") {
+			ComandParametrs.isDump = true;
+		}
+		if (comand == "help") {
+
+		}
+	}
 }
 
 int Modul(int x, int mod) {
