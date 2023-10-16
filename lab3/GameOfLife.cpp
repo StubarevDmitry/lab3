@@ -5,55 +5,67 @@
 #include <iostream>
 #include <thread>
 
-struct ComandParametrs {
-	std::string dump;
-	bool isDump = false;
-	bool isTick = false;
-	bool exit = false;
-	int tick = 1;
-}ComandParametrs;
+Life::Life() {
+	for (size_t i = 0; i < sizeY; i++)
+	{
+		for (size_t j = 0; j < sizeX; j++)
+		{
+			board[i][j] = 0;
+		}
+	}
+	board[10][10] = 1;
+	board[11][10] = 1;
+	board[9][10] = 1;
+	board[9][9] = 1;
+	board[10][8] = 1;
+	board[10][15] = 1;
+	board[10][16] = 1;
+	board[11][15] = 1;
+	board[11][16] = 1;
+	Print();
+}
 
 void Play() {
-	//Life life;
-	std::thread thr1(LifeOrganization);
-	std::thread thr2(Comand);
+	Comands mainComand;
+	std::thread thr1(&Comands::ExecutionOfCommands, &mainComand);
+	std::thread thr2(&Comands::ComandParametrs, &mainComand);
 	thr1.join();
 	thr2.join();
 }
 
-void LifeOrganization() {
+void Comands::ExecutionOfCommands() {
 	Life life;
 	while (true)
 	{
-		if (ComandParametrs.isTick) {
-			for (size_t i = 0; i < ComandParametrs.tick; i++)
-			{
-				Sleep(200);
-				life.OneStep();
-			}
-			ComandParametrs.isTick = false;
-			ComandParametrs.tick = 1;
+		if (isTick) {
+			life.FewSteps(tick);
+			isTick = false;
+			tick = 1;
 		}
-		if (ComandParametrs.isDump) {
-			std::ofstream out;
-			out.open(ComandParametrs.dump);
-			if (out.is_open())
-			{
-				out.clear();
-				out << "#N " << ComandParametrs.dump << std::endl;
-				out << "#R B" << life.Birth() << "/S" << life.Survival() << std::endl;
-				for (size_t i = 0; i < sizeY; i++) {
-					for (size_t j = 0; j < sizeX; j++) {
-						if (life.IsLife(j,i) == true) {
-							out << j << " " << i << std::endl;
-						}
-					}
-				}
-			}
-			out.close();
-			ComandParametrs.isDump = false;
+		if (isDump) {
+			life.SaveLifeInFile(fileName);
+			isDump = false;
 		}
 	}
+}
+
+void Life::SaveLifeInFile(std::string fileName) {
+	std::ofstream out;
+	out.open(fileName);
+	if (out.is_open())
+	{
+		out.clear();
+		out << "#N " << fileName << std::endl;
+		out << "#R B" << birth << "/S" << survival << std::endl;
+		for (size_t i = 0; i < sizeY; i++) {
+			for (size_t j = 0; j < sizeX; j++) {
+				if (board[i][j] == 1) {
+					out << j << " " << i << std::endl;
+				}
+			}
+		}
+	}
+	out.close();
 }
 
 bool Life::IsLife(int x, int y) {
@@ -75,33 +87,24 @@ int Life::CountLife(){
 	return count;
 }
 
-int Life::Birth() {
-	return birth;
-}
-
-std::string Life::Survival() {
-	return survival;
-}
-
-void Comand() {
-	while (true)
-	{
+void Comands::ComandParametrs() {
+	while (true) {
 		std::string comand;
 		std::string obj;
 		std::cin >> comand >> obj;
 		if (comand == "exit") {
-			ComandParametrs.exit = true;
+			exit = true;
 		}
 		if (comand == "tick") {
-			ComandParametrs.isTick = true;
-			ComandParametrs.tick = stoi(obj);
+			tick = stoi(obj);
+			isTick = true;
 		}
 		if (comand == "dump") {
-			ComandParametrs.isDump = true;
-			ComandParametrs.dump = obj;
+			fileName = obj;
+			isDump = true;
 		}
 		if (comand == "help") {
-
+		
 		}
 	}
 }
@@ -114,22 +117,6 @@ int Modul(int x, int mod) {
 		return x - mod;
 	}
 	return x;
-}
-
-Life::Life(){
-	for (size_t i = 0; i < sizeY; i++)
-	{
-		for (size_t j = 0; j < sizeX; j++)
-		{
-			board[i][j] = 0;
-		}
-	}
-	board[10][10] = 1;
-	board[11][10] = 1;
-	board[9][10] = 1;
-	board[9][9] = 1;
-	board[10][8] = 1;
-	Print();
 }
 
 void Life::CheckRule() {
@@ -159,6 +146,14 @@ void Life::CheckRule() {
 		for (size_t x = 0; x < sizeX; x++) {
 			board[y][x] += check[y][x];
 		}
+	}
+}
+
+void Life::FewSteps(int n) {
+	for (size_t i = 0; i < n; i++)
+	{
+		Sleep(200);
+		OneStep();
 	}
 }
 

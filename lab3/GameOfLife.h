@@ -5,8 +5,20 @@
 const size_t sizeY = 15;
 const size_t sizeX = 25;
 
-class Life
-{
+class Comands {
+public:
+	//¬ыбирает какие комоманды сейчас введены
+	void ComandParametrs();
+	void ExecutionOfCommands();
+private:
+	std::string fileName;
+	bool isDump = false;
+	bool isTick = false;
+	bool exit = false;
+	int tick = 1;
+};
+
+class Life {
 public:
 	//записывает в массив начачальные показатели из файла .life
 	//записывает в массив начачальные показатели
@@ -14,17 +26,15 @@ public:
 	//запускает код
 	void Run();
 	void OneStep();
+	void FewSteps(int n);
 	//провер€ет нужноли создать или уничтожить жизнь в этой клетке, и делает это
 	void CheckRule();
 	//вывод изображени€ в терминал
 	void Print();
-	//количество клеток дл€ рожени€ новой
-	int Birth();
-	//количество клеток дл€ выживани€
-	std::string Survival();
 	// оличество живых клеток
 	int CountLife();
 	bool IsLife(int x, int y);
+	void SaveLifeInFile(std::string fileName);
 private:
 	//количество клеток дл€ рожени€ новой
 	int birth = 2;
@@ -35,9 +45,5 @@ private:
 
 //«апускает игру
 void Play();
-//интерфейс и выполнение команд
-void LifeOrganization();
-//¬ыбирает какие комоманды сейчас введены
-void Comand();
 //ЅерЄт число x, по модулю mod
 int Modul(int x, int mod);
