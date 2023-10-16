@@ -22,11 +22,14 @@ public:
 	int Birth();
 	//количество клеток дл€ выживани€
 	std::string Survival();
+	// оличество живых клеток
+	int CountLife();
+	bool IsLife(int x, int y);
 private:
 	//количество клеток дл€ рожени€ новой
 	int birth = 2;
 	//количество клеток дл€ выживани€
-	string survival = "23";
+	std::string survival = "23";
 	char board[sizeY][sizeX];
 };
 

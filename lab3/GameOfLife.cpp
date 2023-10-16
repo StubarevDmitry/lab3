@@ -8,9 +8,9 @@
 struct ComandParametrs {
 	std::string dump;
 	bool isDump = false;
-	bool isTick = true;
+	bool isTick = false;
 	bool exit = false;
-	int tick = 30;
+	int tick = 1;
 }ComandParametrs;
 
 void Play() {
@@ -39,13 +39,48 @@ void LifeOrganization() {
 			out.open(ComandParametrs.dump);
 			if (out.is_open())
 			{
+				out.clear();
 				out << "#N " << ComandParametrs.dump << std::endl;
-				out << "#R B" <<life. <<std::endl;
+				out << "#R B" << life.Birth() << "/S" << life.Survival() << std::endl;
+				for (size_t i = 0; i < sizeY; i++) {
+					for (size_t j = 0; j < sizeX; j++) {
+						if (life.IsLife(j,i) == true) {
+							out << j << " " << i << std::endl;
+						}
+					}
+				}
 			}
 			out.close();
 			ComandParametrs.isDump = false;
 		}
 	}
+}
+
+bool Life::IsLife(int x, int y) {
+	if (board[y][x] == 1) {
+		return true;
+	}
+	return false;
+}
+
+int Life::CountLife(){
+	int count = 0;
+	for (size_t i = 0; i < sizeY; i++) {
+		for (size_t j = 0; j < sizeX; j++) {
+			if (board[i][j] == 1) {
+				count += 1;
+			}
+		}
+	}
+	return count;
+}
+
+int Life::Birth() {
+	return birth;
+}
+
+std::string Life::Survival() {
+	return survival;
 }
 
 void Comand() {
@@ -63,6 +98,7 @@ void Comand() {
 		}
 		if (comand == "dump") {
 			ComandParametrs.isDump = true;
+			ComandParametrs.dump = obj;
 		}
 		if (comand == "help") {
 
