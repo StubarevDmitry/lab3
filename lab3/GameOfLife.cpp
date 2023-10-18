@@ -55,6 +55,7 @@ void Life::SaveLifeInFile(std::string fileName) {
 	if (out.is_open())
 	{
 		out.clear();
+		out << "#Life 1.06" << std::endl;
 		out << "#N " << fileName << std::endl;
 		out << "#R B" << birth << "/S" << survival << std::endl;
 		for (size_t i = 0; i < sizeY; i++) {
