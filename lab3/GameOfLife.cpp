@@ -46,6 +46,10 @@ void Comands::ExecutionOfCommands() {
 			life.SaveLifeInFile(fileName);
 			isDump = false;
 		}
+		if (isHelp) {
+			life.Help();
+			isHelp = false;
+		}
 	}
 }
 
@@ -67,6 +71,12 @@ void Life::SaveLifeInFile(std::string fileName) {
 		}
 	}
 	out.close();
+}
+
+void Life::Help() {
+	std::cout << "dump filename - сохранить вселенную в файл" << "\n";
+	std::cout << "tick 1- рассчитать n (по умолчанию 1) итераций и напечатать результат." << "\n";
+	std::cout << "exit – завершить игру" << "\n";
 }
 
 bool Life::IsLife(int x, int y) {
@@ -92,20 +102,22 @@ void Comands::ComandParametrs() {
 	while (true) {
 		std::string comand;
 		std::string obj;
-		std::cin >> comand >> obj;
+		std::cin >> comand;
 		if (comand == "exit") {
 			exit = true;
 		}
 		if (comand == "tick") {
+			std::cin >> obj;
 			tick = stoi(obj);
 			isTick = true;
 		}
 		if (comand == "dump") {
+			std::cin >> obj;
 			fileName = obj;
 			isDump = true;
 		}
 		if (comand == "help") {
-		
+			isHelp = true;
 		}
 	}
 }

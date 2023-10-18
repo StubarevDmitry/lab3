@@ -14,6 +14,7 @@ private:
 	std::string fileName;
 	bool isDump = false;
 	bool isTick = false;
+	bool isHelp = false;
 	bool exit = false;
 	int tick = 1;
 };
@@ -35,6 +36,7 @@ public:
 	int CountLife();
 	bool IsLife(int x, int y);
 	void SaveLifeInFile(std::string fileName);
+	void Help();
 private:
 	//количество клеток для рожения новой
 	int birth = 2;
