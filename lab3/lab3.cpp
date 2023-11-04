@@ -2,6 +2,7 @@
 #include "GameOfLife.h"
 using namespace std;
 int main() {
-	//Life a;
-	Play();
+	//string a;
+	//cin >> a;
+	Launch();
 }
