@@ -1,22 +1,33 @@
 #pragma once
-//#include <string.h>
 #include <fstream>
 #include <string>
 
 const size_t sizeY = 15;
 const size_t sizeX = 25;
 
-class Comands {
+
+class OfflineComands {
 public:
-	Comands();
-	Comands(bool fileExists, std::string ReadFileName);
+	OfflineComands(std::string allComnds[]);
+	void ExecutionOfCommands();
+private:
+	//bool fileExists;
+	std::string fileNameForRead;
+	std::string fileNameForRecord;
+	int tick;
+};
+
+class OnlineComands {
+public:
+	OnlineComands();
+	OnlineComands(bool fileExists, std::string FileName);
 	//¬ыбирает какие комоманды сейчас введены
 	void ComandParametrs();
 	void ExecutionOfCommands();
 private:
 	bool fileExists;
-	std::string readFileName;
-	std::string recordFileName;
+	std::string fileNameForRead;
+	std::string fileNameForRecord;
 	bool isSave = false;
 	bool isTick = false;
 	bool isHelp = false;
@@ -33,11 +44,11 @@ public:
 	//tick = infinite 
 	void Run();
 	//tick = 1
-	void OneStep();
+	void OneStepAndPrint();
 	//tick = n
-	void FewSteps(int n);
+	void FewStepsAndPrint(int n);
 	//провер€ет нужноли создать или уничтожить жизнь в этой клетке, и делает это
-	void CheckRule();
+	void CheckRuleAndStep();
 	//вывод изображени€ в терминал
 	void Print();
 	// оличество живых клеток
@@ -53,8 +64,8 @@ private:
 	std::string survival = "23";
 	char board[sizeY][sizeX];
 };
-
-void Launch();
+//определ€ет как и в каком режиме будет запущена игра
+void Launch(int argc, std::string argv[]);
 //«апускает игру
 void Play(bool isFile, std::string file);
 //ЅерЄт число x, по модулю mod

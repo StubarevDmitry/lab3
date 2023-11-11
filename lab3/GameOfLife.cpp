@@ -11,10 +11,8 @@ Life::Life(std::string fileName) {
 	if ("#Life" != str1Part1 || str1Part2 != "1.06") {
 		in.close();
 		Life();
-		//(*this);
 		return;
 	}
-	//std::string checkStr2Part1 = "#N";
 	std::string str2Part1, str2Part2;
 	in >> str2Part1 >> str2Part2;
 	if ("#N" != str2Part1 || fileName != str2Part2) {
@@ -22,7 +20,6 @@ Life::Life(std::string fileName) {
 		Life();
 		return;
 	}
-	//std::string checkStr3 = "#R" + fileName;
 	std::string str3Part1, str3Part2, str3Part3;
 	in >> str3Part1 >> str3Part2;
 	if ("#R" != str3Part1 ) {
@@ -39,10 +36,9 @@ Life::Life(std::string fileName) {
 		}
 	}
 	while (in >> x >> y) {
-		//std::cout << x << y;
 		board[y][x] = 1;
 	}
-	Print();
+	//Print();
 }
 
 Life::Life() {
@@ -65,71 +61,113 @@ Life::Life() {
 	Print();
 }
 
-Comands::Comands() : fileExists(false), readFileName("") {}
-
-Comands::Comands(bool fileExists, std::string readFileName): fileExists(fileExists), readFileName(readFileName){}
-
-void Launch() {
-	std::string yesOrNo;
+OfflineComands::OfflineComands(std::string allComnds[]) {
 	setlocale(LC_ALL, "Russian");
-tryAgain:
-	std::cout << "’отите открыть файл YES/NO:";
-	std::cin >> yesOrNo;
-	if (yesOrNo == "YES") {
-		std::cout << "\n";
-		std::cout << "¬ведите название файла:";
-		std::string fileName;
-		std::cin >> fileName;
-		std::ifstream in(fileName);
-		if (in.is_open()) {
-			in.close();
-			Play(true, fileName);
+	for (int i = 1; i < 7; i++) {
+		if (allComnds[i] == "-o") {
+			fileNameForRead = allComnds[i + 1];
 		}
-		else {
-			in.close();
-			Play(false, "");
+		if (allComnds[i] == "-in") {
+			fileNameForRecord = allComnds[i + 1];
+		}
+		if (allComnds[i] == "-i") {
+			tick = stoi(allComnds[i + 1]);
 		}
 	}
-	else if (yesOrNo == "NO") {
-		Play(false, "");
+}
+
+void OfflineComands::ExecutionOfCommands() {
+	fileNameForRead = "sec.life";
+	fileNameForRecord = "second.life";
+	tick = 30;
+	std::ifstream in(fileNameForRead);
+	if (in.is_open()) {
+		in.close();
+		Life life(fileNameForRead);
+		for (int i = 0; i < tick; i++) {
+			life.CheckRuleAndStep();
+		}
+		life.SaveLifeInFile(fileNameForRecord);
 	}
 	else {
-		std::cout << "\n";
-		goto tryAgain;
+		std::cout << "‘айл не был найден";
+	}
+	in.close();
+}
+
+OnlineComands::OnlineComands() : fileExists(false), fileNameForRead("") {}
+
+OnlineComands::OnlineComands(bool fileExists, std::string fileNameForRead): fileExists(fileExists), fileNameForRead(fileNameForRead){}
+
+void Launch(int argc, std::string argv[]) {
+	if(argc == 7){
+		OfflineComands offline(argv);
+		offline.ExecutionOfCommands();
+	}
+	else {
+		std::string yesOrNo;
+		setlocale(LC_ALL, "Russian");
+	tryAgain:
+		std::cout << "’отите открыть файл YES/NO:";
+		std::cin >> yesOrNo;
+		if (yesOrNo == "YES") {
+			std::cout << "\n";
+			std::cout << "¬ведите название файла:";
+			std::string fileName;
+			std::cin >> fileName;
+			std::ifstream in(fileName);
+			if (in.is_open()) {
+				in.close();
+				Play(true, fileName);
+			}
+			else {
+				in.close();
+				Play(false, "");
+			}
+		}
+		else if (yesOrNo == "NO") {
+			Play(false, "");
+		}
+		else {
+			std::cout << "\n";
+			goto tryAgain;
+		}
 	}
 }
 
 void Play(bool fileExists, std::string file) {
-	Comands *mainComand;
+	OnlineComands *mainComand;
 	if (fileExists) {
-		mainComand = new Comands(fileExists ,file);
+		mainComand = new OnlineComands(fileExists ,file);
 	}
 	else {
-		mainComand = new Comands();
+		mainComand = new OnlineComands();
 	}
-	std::thread thr1(&Comands::ExecutionOfCommands, mainComand);
-	std::thread thr2(&Comands::ComandParametrs, mainComand);
+	std::thread thr1(&OnlineComands::ExecutionOfCommands, mainComand);
+	std::thread thr2(&OnlineComands::ComandParametrs, mainComand);
 	thr1.join();
 	thr2.join();
 	delete mainComand;
 }
 
-void Comands::ExecutionOfCommands() {
+void OnlineComands::ExecutionOfCommands() {
 	Life* life;
 	if (fileExists) {
-		life = new Life(readFileName);
+		life = new Life(fileNameForRead);
+		life->Print();
 	}
 	else {
 		life = new Life();
+		life->Print();
 	}
 	while (true) {
 		if (isTick) {
-			life->FewSteps(tick);
+			life->FewStepsAndPrint(tick);
 			isTick = false;
 			tick = 1;
 		}
 		if (isSave) {
-			life->SaveLifeInFile(recordFileName);
+			life->SaveLifeInFile(fileNameForRecord);
 			isSave = false;
 		}
 		if (isHelp) {
@@ -185,7 +223,7 @@ int Life::CountLife(){
 	return count;
 }
 
-void Comands::ComandParametrs() {
+void OnlineComands::ComandParametrs() {
 	while (true) {
 		std::string comand;
 		std::string obj;
@@ -200,7 +238,7 @@ void Comands::ComandParametrs() {
 		}
 		if (comand == "dump") {
 			std::cin >> obj;
-			recordFileName = obj;
+			fileNameForRecord = obj;
 			isSave = true;
 		}
 		if (comand == "help") {
@@ -219,7 +257,7 @@ int Module(int x, int mod) {
 	return x;
 }
 
-void Life::CheckRule() {
+void Life::CheckRuleAndStep() {
 	char check[sizeY][sizeX];
 	for (size_t y = 0; y < sizeY; y++) {
 		for (size_t x = 0; x < sizeX; x++) {
@@ -249,16 +287,16 @@ void Life::CheckRule() {
 	}
 }
 
-void Life::FewSteps(int n) {
+void Life::FewStepsAndPrint(int n) {
 	for (size_t i = 0; i < n; i++)
 	{
 		Sleep(200);
-		OneStep();
+		OneStepAndPrint();
 	}
 }
 
-void Life::OneStep() {
-	CheckRule();
+void Life::OneStepAndPrint() {
+	CheckRuleAndStep();
 	Print();
 }
 
@@ -268,7 +306,7 @@ void Life::Run() {
 	while (true) {
 		//CheckRule();
 		Sleep(200);
-		OneStep();
+		OneStepAndPrint();
 		//system("cls");
 		//Print();
 	}
