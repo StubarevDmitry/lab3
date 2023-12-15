@@ -8,10 +8,10 @@ const size_t sizeX = 25;
 
 class OfflineComands {
 public:
-	OfflineComands(std::string allComnds[]);
+	OfflineComands(char* allComnds[]);
+	//Выполнение команд
 	void ExecutionOfCommands();
 private:
-	//bool fileExists;
 	std::string fileNameForRead;
 	std::string fileNameForRecord;
 	int tick;
@@ -23,6 +23,7 @@ public:
 	OnlineComands(bool fileExists, std::string FileName);
 	//Выбирает какие комоманды сейчас введены
 	void ComandParametrs();
+	//Выполнение команд
 	void ExecutionOfCommands();
 private:
 	bool fileExists;
@@ -33,6 +34,24 @@ private:
 	bool isHelp = false;
 	bool exit = false;
 	int tick = 1;
+};
+
+class BoardParameters {
+public:
+	//состаяние вокруг клетки
+	int PointEnvvironment(size_t x, size_t y);
+	void WriteToCell(size_t x, size_t y, int i);
+	int StateInTheCell(size_t x, size_t y);
+	int GetBirth();
+	void SetBirth(int i);
+	std::string GetSurvival();
+	void SetSurvival(std::string str);
+private:
+	//количество клеток для рожения новой
+	int birth = 3;
+	//количество клеток для выживания
+	std::string survival = "23";
+	char board[sizeY][sizeX];
 };
 
 class Life {
@@ -54,18 +73,14 @@ public:
 	//Количество живых клеток
 	int CountLife();
 	//Есть ли жизнь в клетке
-	bool IsLife(int x, int y);
+	bool IsLife(size_t x, size_t y);
 	void SaveLifeInFile(std::string fileName);
 	void Help();
 private:
-	//количество клеток для рожения новой
-	int birth = 2;
-	//количество клеток для выживания
-	std::string survival = "23";
-	char board[sizeY][sizeX];
+	BoardParameters board;
 };
 //определяет как и в каком режиме будет запущена игра
-void Launch(int argc, std::string argv[]);
+void Launch(int argc, char* argv[]);
 //Запускает игру
 void Play(bool isFile, std::string file);
 //Берёт число x, по модулю mod

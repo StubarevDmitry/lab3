@@ -32,13 +32,12 @@ Life::Life(std::string fileName) {
 	{
 		for (size_t j = 0; j < sizeX; j++)
 		{
-			board[i][j] = 0;
+			board.WriteToCell(j, i, 0);
 		}
 	}
 	while (in >> x >> y) {
-		board[y][x] = 1;
+		board.WriteToCell(x, y, 1);
 	}
-	//Print();
 }
 
 Life::Life() {
@@ -46,40 +45,41 @@ Life::Life() {
 	{
 		for (size_t j = 0; j < sizeX; j++)
 		{
-			board[i][j] = 0;
+			board.WriteToCell(j, i, 0);
+			//board[i][j] = 0;
 		}
 	}
-	board[10][10] = 1;
-	board[11][10] = 1;
-	board[9][10] = 1;
-	board[9][9] = 1;
-	board[10][8] = 1;
-	board[10][15] = 1;
-	board[10][16] = 1;
-	board[11][15] = 1;
-	board[11][16] = 1;
+	board.WriteToCell(10, 10, 1);
+	board.WriteToCell(10, 11, 1);
+	board.WriteToCell(10, 9, 1);
+	board.WriteToCell(9, 9, 1);
+	board.WriteToCell(8, 10, 1);
+	board.WriteToCell(15, 10, 1);
+	board.WriteToCell(16, 10, 1);
+	board.WriteToCell(15, 11, 1);
+	board.WriteToCell(16, 11, 1);
 	Print();
 }
 
-OfflineComands::OfflineComands(std::string allComnds[]) {
-	setlocale(LC_ALL, "Russian");
+OfflineComands::OfflineComands(char* allComnds[]) {
 	for (int i = 1; i < 7; i++) {
-		if (allComnds[i] == "-o") {
-			fileNameForRead = allComnds[i + 1];
+		if (std::string(allComnds[i]) == "-o") {
+			fileNameForRead = std::string(allComnds[i + 1]);
+			std::cout <<"-o: " << fileNameForRead << std::endl;
 		}
-		if (allComnds[i] == "-in") {
-			fileNameForRecord = allComnds[i + 1];
+		if (std::string(allComnds[i]) == "-in") {
+			fileNameForRecord = std::string(allComnds[i + 1]);
+			std::cout << "-in: " << fileNameForRecord << std::endl;
 		}
-		if (allComnds[i] == "-i") {
-			tick = stoi(allComnds[i + 1]);
+		if (std::string(allComnds[i]) == "-i") {
+			tick = std::stoi(std::string(allComnds[i + 1]));
+			std::cout << "-i: " << tick << std::endl;
 		}
 	}
 }
 
 void OfflineComands::ExecutionOfCommands() {
-	fileNameForRead = "sec.life";
-	fileNameForRecord = "second.life";
-	tick = 30;
+	setlocale(LC_ALL, "Russian");
 	std::ifstream in(fileNameForRead);
 	if (in.is_open()) {
 		in.close();
@@ -99,7 +99,7 @@ OnlineComands::OnlineComands() : fileExists(false), fileNameForRead("") {}
 
 OnlineComands::OnlineComands(bool fileExists, std::string fileNameForRead): fileExists(fileExists), fileNameForRead(fileNameForRead){}
 
-void Launch(int argc, std::string argv[]) {
+void Launch(int argc, char* argv[]) {
 	if(argc == 7){
 		OfflineComands offline(argv);
 		offline.ExecutionOfCommands();
@@ -186,10 +186,10 @@ void Life::SaveLifeInFile(std::string fileName) {
 		out.clear();
 		out << "#Life 1.06" << std::endl;
 		out << "#N " << fileName << std::endl;
-		out << "#R B" << birth << "/S" << survival << std::endl;
+		out << "#R B" << board.GetBirth() << "/S" << board.GetSurvival() << std::endl;
 		for (size_t i = 0; i < sizeY; i++) {
 			for (size_t j = 0; j < sizeX; j++) {
-				if (board[i][j] == 1) {
+				if (IsLife(j, i)) {
 					out << j << " " << i << std::endl;
 				}
 			}
@@ -204,8 +204,8 @@ void Life::Help() {
 	std::cout << "exit Ц завершить игру" << "\n";
 }
 
-bool Life::IsLife(int x, int y) {
-	if (board[y][x] == 1) {
+bool Life::IsLife(size_t x, size_t y) {
+	if (board.StateInTheCell(x, y) == 1) {
 		return true;
 	}
 	return false;
@@ -215,7 +215,7 @@ int Life::CountLife(){
 	int count = 0;
 	for (size_t i = 0; i < sizeY; i++) {
 		for (size_t j = 0; j < sizeX; j++) {
-			if (board[i][j] == 1) {
+			if (board.StateInTheCell(j, i) == 1) {
 				count += 1;
 			}
 		}
@@ -261,28 +261,19 @@ void Life::CheckRuleAndStep() {
 	char check[sizeY][sizeX];
 	for (size_t y = 0; y < sizeY; y++) {
 		for (size_t x = 0; x < sizeX; x++) {
-			int lifeCount = 0;
 			check[y][x] = 0;
-			if (y == 0 && x == 10) {
-				int a = 3;
-			}
-			for (int i = (int)x - 1; i < (int)x + 2; i++) {
-				for (int j = (int)y - 1; j < (int)y + 2; j++) {
-					lifeCount += board[Module(j, sizeY)][Module(i, sizeX)];
-				}
-			}
-			lifeCount -= board[y][x];
-			if (lifeCount == 3 && board[y][x] == 0) {
+			int lifeCount = board.PointEnvironment(x, y);
+			if (lifeCount == board.GetBirth() && board.StateInTheCell(x, y) == 0) {
 				check[y][x] = 1;
 			}
-			if ((lifeCount < 2 || lifeCount > 3) && board[y][x] == 1) {
+			if ((lifeCount < 2 || lifeCount > 3) && board.StateInTheCell(x, y) == 1) {
 				check[y][x] = -1;
 			}
 		}
 	}
 	for (size_t y = 0; y < sizeY; y++) {
 		for (size_t x = 0; x < sizeX; x++) {
-			board[y][x] += check[y][x];
+			board.WriteToCell(x, y, board.StateInTheCell(x, y) + check[y][x]);
 		}
 	}
 }
@@ -301,14 +292,9 @@ void Life::OneStepAndPrint() {
 }
 
 void Life::Run() {
-	//Print();
-	//Sleep(1000);
 	while (true) {
-		//CheckRule();
 		Sleep(200);
 		OneStepAndPrint();
-		//system("cls");
-		//Print();
 	}
 }
 
@@ -318,7 +304,7 @@ void Life::Print(){
 	{
 		for (size_t j = 0; j < sizeX; j++)
 		{
-			if (board[i][j] == 1) {
+			if (IsLife(j, i)) {
 				std::cout << "1";
 			}
 			else{
@@ -327,4 +313,39 @@ void Life::Print(){
 		}
 		std::cout << "\n";
 	}
+}
+
+int BoardParameters::PointEnvironment(size_t x, size_t y) {
+	int lifeCount = 0;
+	for (int i = (int)x - 1; i < (int)x + 2; i++) {
+		for (int j = (int)y - 1; j < (int)y + 2; j++) {
+			lifeCount += board[Module(j, sizeY)][Module(i, sizeX)];
+		}
+	}
+	lifeCount -= board[y][x];
+	return lifeCount;
+}
+
+void BoardParameters::WriteToCell(size_t x, size_t y, int i) {
+	board[y][x] = i;
+}
+
+int BoardParameters::StateInTheCell(size_t x, size_t y) {
+	return board[y][x];
+}
+
+int BoardParameters::GetBirth() {
+	return birth;
+}
+
+void BoardParameters::SetBirth(int i) {
+	birth = i;
+}
+
+std::string BoardParameters::GetSurvival() {
+	return survival;
+}
+
+void BoardParameters::SetSurvival(std::string str) {
+	survival = str;
 }
