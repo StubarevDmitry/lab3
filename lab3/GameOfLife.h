@@ -6,40 +6,10 @@ const size_t sizeY = 15;
 const size_t sizeX = 25;
 
 
-class OfflineComands {
-public:
-	OfflineComands(char* allComnds[]);
-	//Выполнение команд
-	void ExecutionOfCommands();
-private:
-	std::string fileNameForRead;
-	std::string fileNameForRecord;
-	int tick;
-};
-
-class OnlineComands {
-public:
-	OnlineComands();
-	OnlineComands(bool fileExists, std::string FileName);
-	//Выбирает какие комоманды сейчас введены
-	void ComandParametrs();
-	//Выполнение команд
-	void ExecutionOfCommands();
-private:
-	bool fileExists;
-	std::string fileNameForRead;
-	std::string fileNameForRecord;
-	bool isSave = false;
-	bool isTick = false;
-	bool isHelp = false;
-	bool exit = false;
-	int tick = 1;
-};
-
 class BoardParameters {
 public:
 	//состаяние вокруг клетки
-	int PointEnvvironment(size_t x, size_t y);
+	int PointEnvironment(size_t x, size_t y);
 	void WriteToCell(size_t x, size_t y, int i);
 	int StateInTheCell(size_t x, size_t y);
 	int GetBirth();
